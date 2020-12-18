@@ -153,6 +153,7 @@ module CPU
         state.pcr   = retPC;
         state.pcw   = nextPC;
         ->state.notify;
+        `uvm_info("riscv_CV32E40P", "setRETIRE exit", UVM_DEBUG)
     endtask
 
     task setTRAP;
@@ -167,6 +168,7 @@ module CPU
         state.pcr   = excPC;
         state.pcw   = nextPC;
         ->state.notify;
+        `uvm_info("riscv_CV32E40P", "setTRAP exit", UVM_DEBUG)
     endtask
         
     function automatic void putState (

@@ -93,9 +93,10 @@ module uvmt_cv32_step_compare
   // Note that register writebacks to GPRs will still be checked during each instruction retirement even with stalls
   always @(posedge clknrst_if.reset_n) begin
     is_stall_sim = `CV32E40P_MMRAM.is_stall_sim();
-    if (is_stall_sim) begin
-      `uvm_info("Step-andCompare", $sformatf("is_stall_sim set to 1, disabling CSR wire checks and stable GPR register checks"), UVM_NONE)
-    end
+    //if (is_stall_sim) begin
+    //  `uvm_info("Step-andCompare", $sformatf("is_stall_sim set to 1, disabling CSR wire checks and stable GPR register checks"), UVM_NONE)
+    //end
+    `uvm_info("Step-andCompare", $sformatf("is_stall_sim set to 1, NOT disabling CSR wire checks and stable GPR register checks"), UVM_NONE)
   end
 
   function void check_32bit(input string compared, input bit [31:0] expected, input logic [31:0] actual);
@@ -147,7 +148,8 @@ module uvmt_cv32_step_compare
             check_32bit(.compared(compared_str), .expected(step_compare_if.ovp_cpu_GPR[idx][31:0]), .actual(insn_regs_write_value));
          // FIXME:strichmo:I am removing the static (non-written) register checks, as they fail in presence of I and D bus RAM stalls
          // It would be highly desirable to find an alternative for this type of check to ensure unintended writes to do not
-         else if (!is_stall_sim && !`CV32E40P_TRACER.insn_wb_bypass) // Use actual value from RTL to compare registers which should have not changed
+         //else if (!is_stall_sim && !`CV32E40P_TRACER.insn_wb_bypass) // Use actual value from RTL to compare registers which should have not changed
+         else if (!`CV32E40P_TRACER.insn_wb_bypass) // Use actual value from RTL to compare registers which should have not changed
             check_32bit(.compared(compared_str), .expected(step_compare_if.ovp_cpu_GPR[idx][31:0]), .actual(step_compare_if.riscy_GPR[idx]));
          step_compare_if.num_gpr_checks++;
       end
@@ -160,8 +162,8 @@ module uvmt_cv32_step_compare
            csr_val = 0;
            
            // CSR timing at instruction retirement is not completely deterministic in this simple model in presence of OBI stalls
-           if (is_stall_sim)
-            ignore = 1;
+           //if (is_stall_sim)
+           // ignore = 1;
            case (index)
              "marchid"       : csr_val = cv32e40p_pkg::MARCHID; // warning!  defined in cv32e40p_pkg
              
