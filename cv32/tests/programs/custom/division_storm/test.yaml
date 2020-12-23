@@ -1,0 +1,6 @@
+# Test definition YAML for test
+
+name: division_storm
+uvm_test: uvmt_cv32_firmware_test_c
+description: >
+    Lots and lots of divides
