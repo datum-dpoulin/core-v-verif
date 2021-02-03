@@ -55,7 +55,7 @@
 void delay(int count);
 void mstatus_mie_enable();
 void mstatus_mie_disable();
-void mie_enable_all();
+uint32_t mie_enable_all();
 void mie_disable_all();
 void mie_enable(uint32_t irq);
 void mie_disable(uint32_t irq);

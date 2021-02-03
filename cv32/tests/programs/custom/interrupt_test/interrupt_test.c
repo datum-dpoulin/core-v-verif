@@ -51,9 +51,21 @@ void mstatus_mie_disable() {
     asm volatile("csrrc x0, mstatus, %0" : : "r" (mie_bit));
 }
 
-void mie_enable_all() {
-    uint32_t mie_mask = (uint32_t) -1;
-    asm volatile("csrrs x0, mie, %0" : : "r" (mie_mask));
+uint32_t mie_enable_all() {
+    uint32_t mie_all1s  = (uint32_t) -1;
+    uint32_t mie_rval   = (uint32_t)  0;
+    uint32_t mie_romask = (uint32_t)  0x0000F777; // these bits RO(0)
+
+    asm volatile("csrrs x0, mie, %0" : : "r" (mie_all1s));
+    asm volatile("csrr %0,  mie"     : "=r"  (mie_rval));
+
+    if ((mie_rval | mie_romask) != mie_all1s) {
+      printf("!!!ERROR!!!: CSR MIE reads as 0x%lx - should be 0x%lx.\n\n", mie_rval, (mie_all1s ^ mie_romask));
+      return 0;
+    } else {
+      printf("NOTE: CSR MIE reads as 0x%lx after enabling all interrupts (expected).\n\n", mie_rval);
+      return 1;
+    }
 }
 
 void mie_disable_all() {
@@ -405,7 +417,9 @@ int test3() {
 
     // Enable all interrupts
     mm_ram_assert_irq(0, 0);
-    mie_enable_all();
+    if (!mie_enable_all()) {
+        return ERR_CODE_TEST_3;
+    }
     mstatus_mie_enable();
 
     // Set 2 interrupts
