@@ -76,7 +76,7 @@ task uvme_cv32e40p_instr_vseq_c::body();
       p_sequencer.obi_memory_instr_sqr.mon_trn_fifo.get(mon_trn);
       `uvm_info("OBI_MEMORY_SLV_SEQ", $sformatf("Got mon_trn:\n%s", mon_trn.sprint()), UVM_HIGH)
       
-      error  = mon_trn.__error;
+      error  = mon_trn.err;
       error |= (mon_trn.address > (2**8));
       
       `uvm_create(slv_rsp)
@@ -104,11 +104,14 @@ task uvme_cv32e40p_instr_vseq_c::body();
       end
       else begin
          if (mon_trn.access_type == UVMA_OBI_MEMORY_ACCESS_READ) begin
+            // TODO: need to figured out what a proper error response is
             slv_rsp.rdata = 32'hdead_beef;
          end
       end
       
-      slv_rsp.start(p_sequencer.obi_memory_sqr);
+      //slv_rsp.start(p_sequencer.obi_memory_instr_sqr);
+      slv_rsp.set_sequencer(p_sequencer.obi_memory_instr_sqr);
+      `uvm_send(slv_rsp)
    end
    
 endtask : body
